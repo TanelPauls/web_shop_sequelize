@@ -33,9 +33,11 @@ app.use((req, res, next) => {
 
 const productAdminRoutes = require('./routes/admin/products.js');
 const productRoutes = require('./routes/products.js');
+const shopRoutes = require ('./routes/shop.js');
 
 app.use('/admin', productAdminRoutes);
 app.use(productRoutes);
+app.use(shopRoutes);
 
 sequelize.sync({force: true}).then(()=> {
     return models.User.findByPk(1);
@@ -48,7 +50,8 @@ sequelize.sync({force: true}).then(()=> {
     }
     return user;
 }).then((user)=>{
-    console.log(user);
+    return user.createCart();
+}).then((cart)=>{
     app.listen(7013, "0.0.0.0", () => {
       console.log('App is started at http://localhost:7013');
     });
