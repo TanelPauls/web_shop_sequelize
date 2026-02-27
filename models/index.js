@@ -30,6 +30,9 @@ module.exports = (() => {
     models.Product = require('./product.js');
     models.Cart = require('./cart.js');
     models.CartItem = require('./cart-item.js');
+    models.Order = require('./order.js');
+    models.OrderItem = require('./order-item.js');
+
 
     models.User.hasMany(models.Product);
     models.Product.belongsTo(models.User, {constrains: true, onDelete: 'CASCADE'});
@@ -37,6 +40,12 @@ module.exports = (() => {
     models.Cart.belongsTo(models.User);
     models.Cart.belongsToMany(models.Product, {through: models.CartItem});
     models.Product.belongsToMany(models.Cart, {through: models.CartItem});
+
+    models.User.hasOne(models.Order);
+    models.Order.belongsTo(models.User);
+    models.Order.belongsToMany(models.Product, {through: models.OrderItem});
+    models.Product.belongsToMany(models.Order, {through: models.OrderItem});
+
 
     return models;
 })();

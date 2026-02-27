@@ -29,25 +29,25 @@ app.use('/admin', productAdminRoutes);
 app.use(productRoutes);
 app.use(shopRoutes);
 
-sequelize.sync({force: true}).then(()=> {
-    return models.User.findByPk(1);
-}).then(user => {
-    if(!user){
-        return models.User.create({
+sequelize.sync({ force: true })
+.then(async () => {
+    let user = await models.User.findByPk(1);
+
+    if (!user) {
+        user = await models.User.create({
             name: 'user',
             email: 'user@local.com'
         });
     }
-    return user;
-}).then((user)=>{
-    return user.createCart();
-}).then((cart)=>{
+
+    await user.createCart();
+    await user.createOrder();
+
     app.listen(7013, "0.0.0.0", () => {
-      console.log('App is started at http://localhost:7013');
+        console.log('App is started at http://localhost:7013');
     });
-}).catch((error) => {
-    console.error(error);
-  });
+})
+.catch(console.error);
 
 app.get('/', (req, res) => {
     res.json({message: 'web shop app'});
