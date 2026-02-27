@@ -16,6 +16,79 @@ class shopController {
             products: cartProducts
         })
     }
+
+    async addToCart(req, res) {
+        const productId = parseInt(req.body.productId);
+        const requestedQty = parseInt(req.body.quantity) || 1;
+
+        if (!productId || requestedQty <= 0) {
+            return res.status(400).json({ message: 'Invalid productId or quantity' });
+        }
+
+        try {
+            const cart = await req.user.getCart();
+            const products = await cart.getProducts({
+                where: { id: productId }
+            });
+
+            let product = products[0];
+            let newQuantity = requestedQty;
+
+            if (product) {
+                const oldQuantity = product.cartItem.quantity;
+                newQuantity = oldQuantity + requestedQty;
+            } else {
+                product = await Product.findByPk(productId);
+                if (!product) {
+                    return res.status(404).json({ message: 'Product not found' });
+                }
+            }
+
+            await cart.addProduct(product, {
+                through: { quantity: newQuantity }
+            });
+
+            res.status(200).json({
+                message: 'Product added to cart',
+                productId,
+                quantity: newQuantity
+            });
+
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
+
+    async removeProductFromCart(req, res) {
+        const productId = parseInt(req.body?.productId);
+
+        if (!productId) {
+            return res.status(400).json({ message: 'Invalid productId' });
+        }
+
+        try {
+            const cart = await req.user.getCart();
+
+            const products = await cart.getProducts({
+                where: { id: productId }
+            });
+
+            const product = products[0];
+
+            if (!product) {
+                return res.status(404).json({ message: 'Product not in cart' });
+            }
+
+            await cart.removeProduct(product);
+
+            res.status(200).json({
+                message: 'Product removed from cart'
+            });
+
+        } catch (error) {
+            res.status(500).json({ error: error.message });
+        }
+    }
 }
 
 module.exports = new shopController();

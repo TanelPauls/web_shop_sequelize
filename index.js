@@ -14,16 +14,6 @@ const sequelize = require('./utils/db.js');
 const models = require('./models/index.js');
 sequelize.models = models;
 
-/* sequelize.sync({force: true})
-  .then(() => {
-    console.log('Tabelid on loodud.');
-    app.listen(7013, "0.0.0.0", () => {
-      console.log('App is started at http://localhost:7013');
-    });
-  })
-  .catch((error) => {
-    console.error(error);
-  }); */
 app.use((req, res, next) => {
     models.User.findByPk(1).then(user=>{
         req.user = user;
